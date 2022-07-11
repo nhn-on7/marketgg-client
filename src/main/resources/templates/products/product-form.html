@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://thymeleaf.org">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport"
+              content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>Market GG | 상품 화면</title>
+        <link rel="stylesheet" href="css/reset.css" />
+        <link rel="stylesheet" href="css/font.css" />
+        <link rel="stylesheet" href="css/marketgg.css" />
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
+        <!-- Editor's Style -->
+        <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
+
+        <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+        <script src="js/editor.js" defer></script>
+    </head>
+    <body>
+        <th:block th:include="includes/header"></th:block>
+        <th:block th:include="includes/gnb"></th:block>
+
+        <main>
+            <section>
+                <a href="/admin/v1/products">모든 상품 조회</a>
+            </section>
+            <div id="editor"></div>
+            <button type="submit" id="btn-submit">
+                상품 등록
+            </button>
+        </main>
+
+        <th:block th:include="includes/footer"></th:block>
+    </body>
+</html>
