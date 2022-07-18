@@ -1,34 +1,26 @@
 package com.nhnacademy.marketgg.client.web;
 
-import com.nhnacademy.marketgg.client.domain.dto.request.ProductCreateRequest;
-import com.nhnacademy.marketgg.client.domain.dto.request.ProductModifyRequest;
+
 import com.nhnacademy.marketgg.client.domain.dto.response.ProductResponse;
+import com.nhnacademy.marketgg.client.dto.request.ProductInquiryRequest;
+import com.nhnacademy.marketgg.client.dto.response.ProductInquiryResponse;
+import com.nhnacademy.marketgg.client.service.ProductInquiryService;
 import com.nhnacademy.marketgg.client.service.ProductService;
-import java.io.IOException;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-/**
- * 상품 컨트롤러 입니다.
- *
- * @version 1.0.0
- */
+import java.util.List;
+
 @Controller
-@RequestMapping("/admin/v1/products")
+@RequestMapping("/shop/v1/products")
 @RequiredArgsConstructor
 public class ProductController {
 
     private final ProductService productService;
-    private final static String DEFAULT_PRODUCT_URI = "/admin/v1/products";
+    private final ProductInquiryService productInquiryService;
+    private static final String DEFAULT_PRODUCT_URI = "/products";
 
     /**
      * 기본 상품 index 페이지 GetMapping을 지원합니다.
@@ -42,38 +34,7 @@ public class ProductController {
     }
 
     /**
-     * 상품 생성을 위한 PostMapping 을 지원 합니다.
-     *
-     * @param image          - 사진은 MultipartFile 타입입니다.
-     * @param productRequest - 상품 생성을 위한 DTO 입니다.
-     * @return - 기본 뷰 페이지를 리턴합니다.
-     * @throws IOException
-     * @since 1.0.0
-     */
-    @PostMapping("/create")
-    public ModelAndView createProduct(@RequestPart(value = "image") final MultipartFile image,
-                                      @ModelAttribute final ProductCreateRequest productRequest)
-        throws IOException {
-
-        productService.createProduct(image, productRequest);
-
-        return new ModelAndView("redirect:" + DEFAULT_PRODUCT_URI + "/index");
-    }
-
-    /**
-     * 상품 생성 페이지 조회를 위한 GetMapping 을 지원 합니다.
-     *
-     * @return - 상품 생성 폼을 리턴합니다.
-     * @since 1.0.0
-     */
-    @GetMapping("/create")
-    public ModelAndView createProduct() {
-
-        return new ModelAndView("products/product-form");
-    }
-
-    /**
-     * 모든 상품을 조회를 위한 GetMapping 을 지원 합니다.
+     * 모든 상품 조회를 위한 GetMapping 을 지원 합니다.
      * 타임리프에서 products로 조회할 수 있습니다.
      * List 타입 입니다.
      *
@@ -85,7 +46,7 @@ public class ProductController {
 
         List<ProductResponse> products = productService.retrieveProducts();
 
-        ModelAndView mav = new ModelAndView("products/retrieve-products");
+        ModelAndView mav = new ModelAndView(DEFAULT_PRODUCT_URI);
         mav.addObject("products", products);
 
         return mav;
@@ -100,11 +61,11 @@ public class ProductController {
      * @since 1.0.0
      */
     @GetMapping("/{productId}")
-    public ModelAndView retrieveProductDetails(@PathVariable Long productId) {
+    public ModelAndView retrieveProductDetails(@PathVariable final Long productId) {
 
         ProductResponse productDetails = productService.retrieveProductDetails(productId);
 
-        ModelAndView mav = new ModelAndView("products/product-details");
+        ModelAndView mav = new ModelAndView(DEFAULT_PRODUCT_URI + "/" + productId);
         mav.addObject("productDetails", productDetails);
 
         return mav;
@@ -120,72 +81,83 @@ public class ProductController {
      * @since 1.0.0
      */
     @GetMapping("/{categorizationCode}/{categoryCode}")
-    public ModelAndView retrieveProductsByCategory(@PathVariable String categorizationCode,
-                                                   @PathVariable String categoryCode) {
+    public ModelAndView retrieveProductsByCategory(@PathVariable final String categorizationCode,
+                                                   @PathVariable final String categoryCode) {
 
         List<ProductResponse> products =
-            productService.retrieveProductsByCategory(categorizationCode, categoryCode);
+                productService.retrieveProductsByCategory(categorizationCode, categoryCode);
 
         ModelAndView mav = new ModelAndView("products/retrieve-products");
         mav.addObject("products", products);
 
         return mav;
     }
-
+    // REVIEW 상품 문의 2: 상품 문의 등록
     /**
-     * 상품 수정 페이지로 가기 위한 GetMapping 을 지원합니다.
-     * 상품의 원래 속성이 기본으로 지정되어 있습니다.
+     * 상품 문의 생성을 하기 위한 GetMapping 을 지원합니다.
      *
-     * @param productId - 상품 PK 입니다.
-     * @return - 상품 수정 페이지를 리턴합니다.
+     * @param productId - 상품 문의 생성을 위한 상품 id 입니다.
+     * @return  - 상품 문의 작성 페이지를 리턴합니다.
      * @since 1.0.0
      */
-    @GetMapping("/update/{productId}")
-    public ModelAndView updateProduct(@PathVariable Long productId) {
+    @GetMapping("/{productId}/inquiries/create")
+    public ModelAndView createProductInquiry(@PathVariable final Long productId) {
+        ModelAndView mav = new ModelAndView("products/inquiry-form");
+        mav.addObject("productId", productId);
 
-        ModelAndView mav = new ModelAndView("products/product-modify-form");
+        return mav;
+    }
 
-        ProductResponse product = productService.retrieveProductDetails(productId);
-        mav.addObject("product", product);
+    // REVIEW 상품 문의 2: 상품 문의 등록
+    /**
+     * 상품 문의 생성을 하기 위한 PostMapping 을 지원합니다.
+     *
+     * @param productId - 상품 문의 생성을 하기 위한 상품 id 입니다.
+     * @param productInquiryRequest - 상품 문의 내용을 담은 Request Dto 입니다.
+     * @return 상품 문의 조회 페이지를 리턴합니다.
+     * @since 1.0.0
+     */
+    @PostMapping("/{productId}/inquiries/create")
+    public ModelAndView createProductInquiry(@PathVariable final Long productId,
+                                             @ModelAttribute final ProductInquiryRequest productInquiryRequest) {
+
+        productInquiryService.createProductInquiry(productId, productInquiryRequest);
+
+        return new ModelAndView("redirect:/products/" + productId + "/inquiries");
+    }
+
+    // REVIEW 상품 문의 1: 상품 상세 페이지에서 상품 문의 조회 페이지로 들어가는 링크
+    /**
+     * 상품 상세페이지에서 전체 상품 문의 글을 조회 하기 위한 GetMapping 을 지원합니다.
+     *
+     * @param productId - 상품 문의 조회를 하기 위한 상품 id 입니다.
+     * @return 상품 문의 조회 페이지를 리턴합니다.
+     * @since 1.0.0
+     */
+    @GetMapping("/{productId}/inquiries")
+    public ModelAndView retrieveProductInquiryByProductId(@PathVariable final Long productId) {
+        List<ProductInquiryResponse> productInquiryResponses = productInquiryService.retrieveProductInquiryByProductId(productId);
+
+        ModelAndView mav = new ModelAndView("products/product-inquiry");
+        mav.addObject("productInquiryResponses", productInquiryResponses);
+
         return mav;
     }
 
     /**
-     * 상품 수정을 위한 PostMapping 을 지원 합니다.
-     * multipartFile 의 경우 html form 에서 PUT 맵핑을 적용 시키기 어려워서 일단 POST로 구현했습니다.
-     * 차후에 PutMapping으로 수정해야 합니다.
+     * 상품 상세 페이지에서 특정 상품 문의를 삭제하기 위한 PostingMapping 을 지원합니다.
      *
-     * @param image          - MultipartFile 타입입니다.
-     * @param productRequest - 상품 수정을 위한 DTO 입니다.
-     * @param productId      - 상품의 PK 입니다.
-     * @return - index 페이지를 리턴합니다.
-     * @throws IOException
+     * @param productId - 상품 id 입니다.
+     * @param inquiryId - 삭제할 상품 문의 글의 id 입니다.
+     * @return 상품 문의 조회 페이지를 리턴합니다.
      * @since 1.0.0
      */
+    @PostMapping("/{productId}/inquiries/delete/{inquiryId}")
+    public ModelAndView deleteProductInquiry(@PathVariable final Long productId,
+                                             @PathVariable final Long inquiryId) {
+        productInquiryService.deleteProductInquiry(productId, inquiryId);
 
-    @PostMapping("/update/{productId}")
-    public ModelAndView updateProduct(@PathVariable Long productId,
-                                      @RequestPart(value = "image") final MultipartFile image,
-                                      @ModelAttribute final ProductModifyRequest productRequest)
-        throws IOException {
-
-        productService.updateProduct(productId, image, productRequest);
-
-        return new ModelAndView("redirect:" + DEFAULT_PRODUCT_URI + "/index");
+        return new ModelAndView("redirect:/products/" + productId + "/inquiries/" + inquiryId);
     }
 
-    /**
-     * 상품 삭제를 위한 PostMapping을 지원합니다.
-     * 소프트 삭제입니다.
-     *
-     * @param productId - 상품의 PK 입니다.
-     * @return - index 페이지를 리턴합니다.
-     */
-    @PostMapping("/{productId}/delete")
-    public ModelAndView deleteProduct(@PathVariable Long productId) {
-
-        productService.deleteProduct(productId);
-
-        return new ModelAndView("redirect:" + DEFAULT_PRODUCT_URI + "/index");
-    }
 }

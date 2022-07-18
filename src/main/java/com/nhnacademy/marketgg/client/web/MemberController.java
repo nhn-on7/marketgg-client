@@ -1,9 +1,9 @@
 package com.nhnacademy.marketgg.client.web;
 
 import com.nhnacademy.marketgg.client.dto.Message;
+import com.nhnacademy.marketgg.client.dto.response.ProductInquiryResponse;
 import com.nhnacademy.marketgg.client.service.MemberService;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import com.nhnacademy.marketgg.client.service.ProductInquiryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 회원관리에 관련된 Controller 입니다.
@@ -23,6 +27,7 @@ import org.springframework.web.servlet.ModelAndView;
 public class MemberController {
 
     private final MemberService memberService;
+    private final ProductInquiryService productInquiryService;
 
     /**
      * 선택한 회원의 GG 패스 화면으로 이동합니다.
@@ -53,7 +58,7 @@ public class MemberController {
         if (memberService.retrievePassUpdatedAt(memberId).isAfter(LocalDateTime.now())) {
             ModelAndView mav = new ModelAndView("message");
             mav.addObject("error", new Message("이미 구독하신 상태입니다.",
-                                               "/shop/v1/members/" + memberId + "/ggpass"));
+                    "/shop/v1/members/" + memberId + "/ggpass"));
             return mav;
         }
         memberService.subscribePass(memberId);
@@ -73,6 +78,24 @@ public class MemberController {
         memberService.withdrawPass(memberId);
 
         return new ModelAndView("redirect:/shop/v1/members/" + memberId + "/ggpass");
+    }
+
+    // REVIEW 상품 문의 3: 마이 gg 페이지에서 상품 문의 조회하는 페이지
+    /**
+     * 선택한 회원의 마이페이지에서 작성했던 전체 상품 문의를 조회한다.
+     *
+     * @param memberId - 상품 문의를 조회할 회원의 식별번호입니다.
+     * @return 회원이 작성한 전체 상품 문의를 조회하는 메소드 실행 후 response 값을 가지고 조회페이지로 이동합니다.
+     * @since 1.0.0
+     */
+    @GetMapping("/{memberId}/product-inquiries")
+    public ModelAndView retrieveProductInquiryByMemberId(@PathVariable final Long memberId) {
+        List<ProductInquiryResponse> productInquiries = productInquiryService.retrieveProductInquiryByMemberId(memberId);
+
+        ModelAndView mav = new ModelAndView("mygg/product-inquiry");
+        mav.addObject("productInquiries", productInquiries);
+
+        return mav;
     }
 
 }
