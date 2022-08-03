@@ -3,7 +3,9 @@ package com.nhnacademy.marketgg.client.service.impl;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nhnacademy.marketgg.client.dto.response.common.SingleResponse;
 import com.nhnacademy.marketgg.client.jwt.JwtInfo;
 import com.nhnacademy.marketgg.client.oauth2.GoogleProfile;
 import com.nhnacademy.marketgg.client.oauth2.TokenRequest;
@@ -68,27 +70,27 @@ public class GoogleLoginService implements OAuth2Service {
         ResponseEntity<String> profileResponse =
             restTemplate.exchange(loginRequestUrl, HttpMethod.POST, httpEntity, String.class);
 
-
         return setLogin(profileResponse, sessionId);
     }
 
     private Optional<GoogleProfile> setLogin(final ResponseEntity<String> profileResponse, final String sessionId)
         throws JsonProcessingException {
 
-        Optional<GoogleProfile> googleProfile =
-            Optional.of(objectMapper.readValue(profileResponse.getBody(), GoogleProfile.class));
-
-        if (Objects.isNull(profileResponse.getHeaders().get(HttpHeaders.AUTHORIZATION))) {
-            return googleProfile;
-        }
-
         HttpHeaders headers = profileResponse.getHeaders();
 
-        if (isInvalidHeader(headers)) {
-            return googleProfile;
+        if (Objects.isNull(profileResponse.getHeaders().get(HttpHeaders.AUTHORIZATION)) || isInvalidHeader(headers)) {
+
+            SingleResponse<GoogleProfile> responseResult =
+                objectMapper.readValue(profileResponse.getBody(), new TypeReference<>() {
+                });
+
+            return Optional.ofNullable(responseResult.getData());
         }
 
         String jwt = Objects.requireNonNull(headers.get(AUTHORIZATION)).get(0);
+        if (jwt.startsWith(JwtInfo.BEARER)) {
+            jwt = jwt.substring(JwtInfo.BEARER_LENGTH);
+        }
         String expire = Objects.requireNonNull(headers.get(JwtInfo.JWT_EXPIRE)).get(0);
 
         JwtInfo jwtInfo = new JwtInfo(jwt, expire);

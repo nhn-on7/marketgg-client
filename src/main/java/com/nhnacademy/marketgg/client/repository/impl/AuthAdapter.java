@@ -60,15 +60,14 @@ public class AuthAdapter implements AuthRepository {
         HttpEntity<LoginRequest> httpEntity = new HttpEntity<>(loginRequest, httpHeaders);
 
         ResponseEntity<Void> response =
-            restTemplate.postForEntity(requestUrl + "/auth/login", httpEntity, Void.class);
-        restTemplate.postForEntity(requestUrl + "/auth/login", httpEntity, Void.class);
+            restTemplate.postForEntity(requestUrl + "/auth/v1/login", httpEntity, Void.class);
 
         this.checkStatus(response);
 
         HttpHeaders headers = response.getHeaders();
 
         String jwt = Objects.requireNonNull(headers.get(AUTHORIZATION)).get(0);
-        if (jwt.startsWith("Bearer")) {
+        if (jwt.startsWith(JwtInfo.BEARER)) {
             jwt = jwt.substring(7);
         }
         String expire = Objects.requireNonNull(headers.get(JwtInfo.JWT_EXPIRE)).get(0);
@@ -89,7 +88,7 @@ public class AuthAdapter implements AuthRepository {
         HttpEntity<MemberSignupToAuth> httpEntity = new HttpEntity<>(memberSignupToAuth, headers);
 
         ResponseEntity<MemberSignupResponse> exchange =
-            restTemplate.exchange(requestUrl + "/member/v1/members/signup", HttpMethod.POST,
+            restTemplate.exchange(requestUrl + "/auth/v1/signup", HttpMethod.POST,
                 httpEntity, MemberSignupResponse.class);
 
         log.info("signup success: {}", exchange.getStatusCode());
@@ -105,7 +104,7 @@ public class AuthAdapter implements AuthRepository {
         HttpEntity<EmailRequest> httpEntity = new HttpEntity<>(emailRequest, headers);
 
         ResponseEntity<EmailExistResponse> exchange =
-            restTemplate.exchange(requestUrl + "/auth/check/email", HttpMethod.POST, httpEntity,
+            restTemplate.exchange(requestUrl + "/auth/v1/check/email", HttpMethod.POST, httpEntity,
                 EmailExistResponse.class);
 
         log.info("email exist {}", exchange.getBody());
@@ -120,7 +119,7 @@ public class AuthAdapter implements AuthRepository {
         HttpEntity<EmailRequest> httpEntity = new HttpEntity<>(emailRequest, headers);
 
         ResponseEntity<EmailUseResponse> exchange =
-            restTemplate.exchange(requestUrl + "/auth/use/email", HttpMethod.POST, httpEntity,
+            restTemplate.exchange(requestUrl + "/auth/v1/use/email", HttpMethod.POST, httpEntity,
                 EmailUseResponse.class);
 
         log.info("email exist {}", exchange.getBody());
@@ -136,7 +135,7 @@ public class AuthAdapter implements AuthRepository {
 
         HttpEntity<MemberWithdrawRequest> httpEntity = new HttpEntity<>(memberWithdrawRequest, httpHeaders);
         ResponseEntity<Void> response =
-            restTemplate.exchange(requestUrl + "/auth/info", HttpMethod.DELETE, httpEntity,
+            restTemplate.exchange(requestUrl + "/auth/v1/info", HttpMethod.DELETE, httpEntity,
                 Void.class);
 
         redisTemplate.opsForHash().delete(sessionId, JwtInfo.JWT_REDIS_KEY);
@@ -154,7 +153,7 @@ public class AuthAdapter implements AuthRepository {
         HttpEntity<MemberUpdateToAuth> httpEntity =
             new HttpEntity<>(memberUpdateToAuth, httpHeaders);
         ResponseEntity<MemberUpdateToAuthResponse> response =
-            restTemplate.exchange(requestUrl + "/auth/info", HttpMethod.PUT, httpEntity,
+            restTemplate.exchange(requestUrl + "/auth/v1/info", HttpMethod.PUT, httpEntity,
                 MemberUpdateToAuthResponse.class
             );
 
@@ -217,7 +216,7 @@ public class AuthAdapter implements AuthRepository {
         }
 
         ResponseEntity<Void> forEntity =
-            restTemplate.getForEntity(requestUrl + "/auth/logout", Void.class);
+            restTemplate.getForEntity(requestUrl + "/auth/v1/logout", Void.class);
 
         HttpStatus statusCode = forEntity.getStatusCode();
 
@@ -227,4 +226,5 @@ public class AuthAdapter implements AuthRepository {
 
         redisTemplate.opsForHash().delete(sessionId, JwtInfo.JWT_REDIS_KEY);
     }
+
 }

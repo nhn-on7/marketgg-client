@@ -18,6 +18,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  *
  * @version 1.0.0
  * @see <a href="https://www.baeldung.com/spring-rest-template-interceptor">RestTemplate Interceptor</a>
+ * @author 윤동열
  */
 @Slf4j
 @RequiredArgsConstructor

@@ -3,7 +3,6 @@ package com.nhnacademy.marketgg.client.repository;
 import com.nhnacademy.marketgg.client.dto.request.MemberSignupToShopMember;
 import com.nhnacademy.marketgg.client.dto.request.MemberWithdrawRequest;
 import com.nhnacademy.marketgg.client.dto.response.MemberUpdateToAuthResponse;
-
 import java.time.LocalDateTime;
 
 /**

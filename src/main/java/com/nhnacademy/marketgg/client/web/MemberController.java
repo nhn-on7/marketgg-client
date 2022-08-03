@@ -2,13 +2,13 @@ package com.nhnacademy.marketgg.client.web;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.nhnacademy.marketgg.client.dto.Alert;
-import com.nhnacademy.marketgg.client.dto.request.MemberSignupRequest;
-import com.nhnacademy.marketgg.client.dto.request.MemberUpdateToAuth;
-import com.nhnacademy.marketgg.client.jwt.JwtInfo;
 import com.nhnacademy.marketgg.client.dto.request.GivenCouponCreateRequest;
 import com.nhnacademy.marketgg.client.dto.response.GivenCouponRetrieveResponse;
 import com.nhnacademy.marketgg.client.service.GivenCouponService;
 import com.nhnacademy.marketgg.client.service.MemberService;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,21 +18,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpSession;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.List;
-
 /**
  * 회원관리에 관련된 Controller 입니다.
  *
  * @version 1.0.0
  */
 @Controller
-@RequestMapping("/shop/v1/members")
+@RequestMapping("/members")
 @RequiredArgsConstructor
 public class MemberController {
+
+    private static final String REDIRECT = "redirect:";
 
     private final MemberService memberService;
     private final GivenCouponService givenCouponService;
@@ -68,12 +64,12 @@ public class MemberController {
         if (memberService.retrievePassUpdatedAt(memberId).isAfter(LocalDateTime.now())) {
             ModelAndView mav = new ModelAndView("message");
             mav.addObject("message", new Alert("이미 구독하신 상태입니다.",
-                    DEFAULT_MEMBER + "/" + memberId + "/ggpass"));
+                DEFAULT_MEMBER + "/" + memberId + "/ggpass"));
             return mav;
         }
         memberService.subscribePass(memberId);
 
-        return new ModelAndView("redirect:" + DEFAULT_MEMBER + "/" + memberId + "/ggpass");
+        return new ModelAndView(REDIRECT + DEFAULT_MEMBER + "/" + memberId + "/ggpass");
     }
 
     /**
@@ -87,77 +83,13 @@ public class MemberController {
     public ModelAndView withdrawPass(@PathVariable final Long memberId) {
         memberService.withdrawPass(memberId);
 
-        return new ModelAndView("redirect:" + DEFAULT_MEMBER + "/" + memberId + "/ggpass");
+        return new ModelAndView(REDIRECT + DEFAULT_MEMBER + "/" + memberId + "/ggpass");
     }
 
-    /**
-     * 회원가입 View
-     *
-     * @return 회원가입 폼
-     * @since 1.0.0
-     */
-    @GetMapping("/signup")
-    public ModelAndView signup() {
-        return new ModelAndView("member/signup");
-    }
-
-    /**
-     * 회원가입 요청을 받아 회원가입을 진행합니다.
-     *
-     * @param memberSignupRequest - 회원가입에 필요한 요청 정보 객체입니다.
-     * @return 회원가입 실행 후, 다시 Index 페이지로 이동합니다.
-     * @since 1.0.0
-     */
-    @PostMapping("/signup")
-    public ModelAndView doSignup(final MemberSignupRequest memberSignupRequest) {
-
-        memberService.doSignup(memberSignupRequest);
-        return new ModelAndView("index");
-    }
-
-    /**
-     * 회원정보 수정 요청을 받아 회원정보 수정 프로세스를 진행합니다.
-     *
-     * @param memberUpdateToAuth - 회원정보 수정에 필요한 요청 정보 객체 (Auth 정보만 수정됨)  입니다.
-     * @param session            - session 이 없는 회원의 접근을 막기위한 파라미터 입니다.
-     * @return 회원수정 실행 후, 다시 Index 페이지로 이동합니다.
-     * @since 1.0.0
-     */
-    @PostMapping("/update")
-    public ModelAndView doUpdate(@ModelAttribute MemberUpdateToAuth memberUpdateToAuth, HttpSession session) {
-        String sessionId = (String) session.getAttribute(JwtInfo.SESSION_ID);
-
-        if (Objects.isNull(sessionId)) {
-            // TODO: Merge 후 처리할 예정.
-            throw new RuntimeException();
-        }
-        memberService.update(memberUpdateToAuth, sessionId);
-        return new ModelAndView("index");
-    }
-
-    /**
-     * 회원탈퇴 요청을 받아 회원탈퇴 프로세스를 진행합니다.
-     *
-     * @param session - session 이 없는 회원의 접근을 막기위한 파라미터 입니다.
-     * @return 회원탈퇴 실행 후, 다시 Index 페이지로 이동합니다.
-     */
-    @GetMapping("/withdraw")
-    public ModelAndView doWithdraw(HttpSession session) {
-        String sessionId = (String) session.getAttribute(JwtInfo.SESSION_ID);
-
-        if (Objects.isNull(sessionId)) {
-            // TODO: Merge 후 처리할 예정.
-            throw new RuntimeException();
-        }
-
-        memberService.withdraw(sessionId);
-        return new ModelAndView("index");
-    }
-    
     /**
      * 회원이 쿠폰을 등록할 수 있는 POST Mapping 을 지원합니다.
      *
-     * @param memberId - 쿠폰을 등록하는 회원의 식별번호입니다.
+     * @param memberId           - 쿠폰을 등록하는 회원의 식별번호입니다.
      * @param givenCouponRequest - 쿠폰을 등록하기 위한 DTO 객체입니다.
      * @return 쿠폰 index 페이지로 REDIRECT 합니다.
      * @throws JsonProcessingException - Json 컨텐츠를 처리할 때 발생하는 모든 문제에 대한 예외처리입니다.
@@ -165,10 +97,11 @@ public class MemberController {
      */
     @PostMapping("/{memberId}/coupons")
     public ModelAndView registerCoupon(@PathVariable final Long memberId,
-                                       @ModelAttribute final GivenCouponCreateRequest givenCouponRequest) throws JsonProcessingException {
+                                       @ModelAttribute final GivenCouponCreateRequest givenCouponRequest)
+        throws JsonProcessingException {
         givenCouponService.registerCoupon(memberId, givenCouponRequest);
 
-        return new ModelAndView("redirect:" + DEFAULT_MEMBER + "/" + memberId + "/coupons");
+        return new ModelAndView(REDIRECT + DEFAULT_MEMBER + "/" + memberId + "/coupons");
     }
 
     /**

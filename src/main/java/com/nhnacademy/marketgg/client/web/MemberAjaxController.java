@@ -1,5 +1,7 @@
 package com.nhnacademy.marketgg.client.web;
 
+import static org.springframework.http.HttpStatus.OK;
+
 import com.nhnacademy.marketgg.client.dto.request.EmailRequest;
 import com.nhnacademy.marketgg.client.dto.response.EmailExistResponse;
 import com.nhnacademy.marketgg.client.dto.response.EmailUseResponse;
@@ -13,8 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import static org.springframework.http.HttpStatus.OK;
 
 
 @Slf4j
@@ -32,7 +32,7 @@ public class MemberAjaxController {
      * @return 해당 이메일이 중복되는지 중복되지 않는지의 정보를 담고있는 응답 정보 객체
      */
     @ResponseBody
-    @PostMapping("/check/email")
+    @PostMapping("/")
     public ResponseEntity<EmailExistResponse> checkEmail(@RequestBody final EmailRequest emailRequest) {
         log.info(emailRequest.getEmail());
         return ResponseEntity.status(OK)
@@ -52,4 +52,5 @@ public class MemberAjaxController {
                              .contentType(MediaType.APPLICATION_JSON)
                              .body(memberService.useEmail(emailRequest));
     }
+
 }

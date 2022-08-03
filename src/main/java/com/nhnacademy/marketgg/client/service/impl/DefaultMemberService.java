@@ -11,12 +11,12 @@ import com.nhnacademy.marketgg.client.dto.response.MemberUpdateToAuthResponse;
 import com.nhnacademy.marketgg.client.repository.AuthRepository;
 import com.nhnacademy.marketgg.client.repository.MemberRepository;
 import com.nhnacademy.marketgg.client.service.MemberService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +24,7 @@ public class DefaultMemberService implements MemberService {
 
     private final MemberRepository memberRepository;
     private final AuthRepository authRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public LocalDateTime retrievePassUpdatedAt(final Long id) {
@@ -55,11 +56,13 @@ public class DefaultMemberService implements MemberService {
 
     @Override
     public void doSignup(final MemberSignupRequest memberSignupRequest) {
+        memberSignupRequest.encodePassword(passwordEncoder);
+
         MemberSignupResponse response =
-                authRepository.signup(memberSignupRequest.getSignupRequestToAuth());
+            authRepository.signup(memberSignupRequest.getSignupRequestToAuth());
 
         memberRepository.signup(memberSignupRequest
-                .getSignupRequestToShopMember(response.getUuid(), response.getReferrerUuid()));
+            .getSignupRequestToShopMember(response.getUuid(), response.getReferrerUuid()));
     }
 
     @Override

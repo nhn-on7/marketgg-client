@@ -16,62 +16,87 @@
     </head>
     <body>
         <div class="container mt-5">
-            <h3>Market GG</h3>
+            <a href="/"><h3>Market GG</h3></a>
             <div class="card" style="width: 55rem; ">
                 <div class="card-header text-center bg-info ">
                     <h3>회원가입</h3>
                 </div>
                 <div class="card-body">
-                    <form th:action="@{/marketgg/members/signup}" method="post" onsubmit="return formValidation()" th:object="member">
+                    <form th:action="@{/signup}" method="post" onsubmit="return formValidation()" th:object="${member}">
+
+                        <input type="hidden" name="provider"
+                               th:value="${profile == null} ? 'SELF' : ${profile?.provider}"
+                               th:readonly="${profile != null}" />
 
                         <div class="form-group">
-                            <input type="email" class="form-control" th:field="*{email}" placeholder="이메일"
-                                   maxlength="30" required oninput="">
+                            <input type="email" class="form-control" name="email" placeholder="이메일" maxlength="30"
+                                   oninput="" th:value="${profile?.email}" th:readonly="${profile != null}" required />
+                            <div class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">
+                                EMAIL ERROR
+                            </div>
                             <!-- id ajax 중복체크 -->
                             <span id="email-ok" hidden>
-                            사용 가능한 이메일입니다.
-                        </span>
+                                사용 가능한 이메일입니다.
+                            </span>
                             <span id="email-already" hidden>
-                            누군가 이 이메일을 사용하고 있어요.
-                        </span>
+                                누군가 이 이메일을 사용하고 있어요.
+                            </span>
                             <button type="button" id="email-check-btn">이메일 중복체크</button>
-                            <input type="hidden" id="exist-email" value="false">
-                            <input type="hidden" id="use-email" value="false">
+                            <input type="hidden" id="exist-email" value="false" />
+                            <input type="hidden" id="use-email" value="false" />
                         </div>
                         <br>
 
                         <div class="form-group">
-                            <input type="password" class="form-control" id="password"
+                            <input type="password" class="form-control" id="password" name="password"
                                    placeholder="영문,숫자,특수문자 중 2가지 혼합 (영문,숫자 = 통과) (특문,숫자 = 통과) 10~20자리" maxlength="20"
-                                   required>
+                                   required />
                         </div>
                         <div class="form-group">
                             <input type="password" class="form-control" id="password-check"
                                    placeholder="영문,숫자,특수문자 중 2가지 혼합 (영문,숫자 = 통과) (특문,숫자 = 통과) 10~20자리" maxlength="20"
-                                   required>
+                                   required />
                         </div>
+                        <div class="error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">PASSWORD ERROR</div>
                         <button type="button" id="password-check-btn">비밀번호 확인</button>
-                        <input type="hidden" id="use-password" value="false">
+                        <input type="hidden" id="use-password" value="false" />
                         <br>
                         <div class="form-group">
-                            <input type="text" class="form-control" th:field="*{name}" placeholder="이름" maxlength="15" required>
+                            <input type="text" class="form-control" name="name" placeholder="이름" maxlength="15"
+                                   th:value="${profile?.name}" th:readonly="${profile != null}" required />
+                            <div class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">NAME ERROR</div>
+
                         </div>
                         <br>
                         <div class="form-group">
-                            <input type="tel" class="form-control" id="phone-number" placeholder="휴대폰번호" maxlength="15"
-                                   required>
+                            <input type="tel" class="form-control" id="phone-number" name="phoneNumber"
+                                   placeholder="휴대폰번호" maxlength="15" required />
                         </div>
                         <br>
                         <div class="form-group">
-                            <input type="text" class="form-control" id="postcode" placeholder="우편번호" disabled required>
-                            <input type="text" class="form-control" id="address" placeholder="주소" disabled required>
-                            <input type="text" class="form-control" id="detailAddress" placeholder="상세주소" required>
-                            <input type="button" class="btn btn-primary" onclick="execDaumPostcode()" value="우편번호 찾기"><br>
+                            <input type="text" class="form-control" id="postcode" name="zipcode" placeholder="우편번호"
+                                   readonly required />
+                            <input type="text" class="form-control" id="address" name="address" placeholder="주소"
+                                   readonly required />
+                            <input type="text" class="form-control" id="detailAddress" name="detailAddress"
+                                   placeholder="상세주소" required />
+                            <input type="button" class="btn btn-primary" onclick="execDaumPostcode()"
+                                   value="우편번호 찾기" /><br>
+                            <div class="error" th:if="${#fields.hasErrors('zipcode')}" th:errors="*{zipcode}">ZIPCODE
+                                ERROR
+                            </div>
+                            <div class="error" th:if="${#fields.hasErrors('address')}" th:errors="*{address}">ADDRESS
+                                ERROR
+                            </div>
+                            <div class="error" th:if="${#fields.hasErrors('detailAddress')}"
+                                 th:errors="*{detailAddress}">
+                                DETAIL-ADDRESS ERROR
+                            </div>
                         </div>
                         <br>
                         <div class="form-group">
-                            <input type="text" class="form-control" id="referrer-email" placeholder="추천인 이메일"
-                                   maxlength="30">
+                            <input type="text" class="form-control" id="referrer-email" name="referrerEmail"
+                                   placeholder="추천인 이메일" maxlength="30" />
                             <button type="button" id="referrer-exist-email">추천인 확인</button>
                         </div>
                         <br>
@@ -82,25 +107,39 @@
                             <div id="date-picker-example" class="md-form md-outline input-with-post-icon datepicker">
                                 <label for="birthDate"></label><input type="date" id="birthDate" class="form-control">
                             </div>
-                        </div>
-                        <br>
-                        <div class="form-group">
-                            <label>성별</label><br/>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="gender" value="M">남자
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="gender" value="F">여자
+                            <div class="error" th:if="${#fields.hasErrors('birthDate')}" th:errors="*{birthDate}">
+                                DATE ERROR
                             </div>
                         </div>
                         <br>
                         <div class="form-group">
-                            <label>개인정보보호 약관 안내</label><br/>
+                            <label>성별</label>
+                            <br />
+                            <div class="form-check form-check-inline">
+                                <label>
+                                    <input class="form-check-input" type="radio" name="gender" value="M">남자
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <label>
+                                    <input class="form-check-input" type="radio" name="gender" value="F">여자
+                                </label>
+                            </div>
+                            <div class="error" th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}">
+                                GENDER ERROR
+                            </div>
+                        </div>
+                        <br>
+                        <div class="form-group">
+                            <label>개인정보보호 약관 안내</label><br />
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="checkbox" name="inlineRadioOptions"
-                                       id="privacy-policy"
-                                       value="true" checked>
+                                       id="privacy-policy" value="true" />
                                 <label class="form-check-label" for="privacy-policy">이용약관 동의</label>
+                                <div class="error" th:if="${#fields.hasErrors('inlineRadioOptions')}"
+                                     th:errors="*{inlineRadioOptions}">
+                                    Have to check
+                                </div>
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary" id="enable-signup" disabled>회원가입</button>
@@ -150,7 +189,7 @@
                     const emailCheckBtn = document.getElementById("email-check");
                     let isEmailVerified = false;
 
-                    let sampleSocket = new WebSocket("https://localhost:5050/marketgg/use/email",["protocolOne","protocolTwo"]);
+                    let sampleSocket = new WebSocket("https://localhost:5050/marketgg/use/email", ["protocolOne", "protocolTwo"]);
                     sampleSocket.onopen = function () {
                         sampleSocket.send(function sendUseEmailValue() {
                             let requestData = {
@@ -181,19 +220,19 @@
                     const eng = password.search(/[a-z]/ig);
                     const spe = password.search(/[`~!@@#$%^&*|₩₩₩'₩";:₩/?]/gi);
 
-                    if (password !== passwordCheck) {
-                        alert("암호가 일치하지 않습니다.")
-                    } else if (password.length < 10 || password.length > 20) {
-                        alert("10자리 ~ 20자리 이내로 입력 부탁드려요 ^_^77")
-                    } else if (password.search(/\s/) !== -1) {
-                        alert("비밀번호는 공백 없이 입력 부탁드려요 ^_^77")
-                    } else if ((num < 0 && eng < 0) || (eng < 0 && spe < 0) || (spe < 0 && num < 0)) {
-                        alert("영문,숫자,특수문자 중 2가지 이상을 혼합하여 입력 부탁드려요 ^_^77")
-                    } else {
-                        alert("사용 가능한 암호입니다.")
-                        usePassword.value = true;
-                        activeSignUpEvent();
-                    }
+                    // if (password !== passwordCheck) {
+                    //     alert("암호가 일치하지 않습니다.")
+                    // } else if (password.length < 10 || password.length > 20) {
+                    //     alert("10자리 ~ 20자리 이내로 입력 부탁드려요 ^_^77")
+                    // } else if (password.search(/\s/) !== -1) {
+                    //     alert("비밀번호는 공백 없이 입력 부탁드려요 ^_^77")
+                    // } else if ((num < 0 && eng < 0) || (eng < 0 && spe < 0) || (spe < 0 && num < 0)) {
+                    //     alert("영문,숫자,특수문자 중 2가지 이상을 혼합하여 입력 부탁드려요 ^_^77")
+                    // } else {
+                    alert("사용 가능한 암호입니다.")
+                    usePassword.value = true;
+                    activeSignUpEvent();
+                    // }
                 });
 
                 document.getElementById("referrer-exist-email").addEventListener('click', async () => {

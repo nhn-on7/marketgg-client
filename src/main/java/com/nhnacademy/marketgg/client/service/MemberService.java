@@ -5,7 +5,6 @@ import com.nhnacademy.marketgg.client.dto.request.MemberSignupRequest;
 import com.nhnacademy.marketgg.client.dto.request.MemberUpdateToAuth;
 import com.nhnacademy.marketgg.client.dto.response.EmailExistResponse;
 import com.nhnacademy.marketgg.client.dto.response.EmailUseResponse;
-
 import java.time.LocalDateTime;
 
 /**

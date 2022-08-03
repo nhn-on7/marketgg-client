@@ -76,7 +76,7 @@ class MemberControllerTest {
     @DisplayName("GG 패스 메인 페이지")
     void testIndex() throws Exception {
         when(memberService.retrievePassUpdatedAt(anyLong())).thenReturn(LocalDateTime.now());
-        mockMvc.perform(get("/shop/v1/members/{memberId}/ggpass", 1L))
+        mockMvc.perform(get("/members/{memberId}/ggpass", 1L))
                .andExpect(status().isOk())
                .andExpect(view().name("/ggpass/index"));
     }
@@ -87,7 +87,7 @@ class MemberControllerTest {
         doNothing().when(memberService).subscribePass(anyLong());
         when(memberService.retrievePassUpdatedAt(anyLong())).thenReturn(LocalDateTime.now());
 
-        mockMvc.perform(post("/shop/v1/members/{memberId}/ggpass/subscribe", 1L))
+        mockMvc.perform(post("/members/{memberId}/ggpass/subscribe", 1L))
                .andExpect(status().is3xxRedirection());
 
         verify(memberService, times(1)).subscribePass(anyLong());
@@ -100,7 +100,7 @@ class MemberControllerTest {
         when(memberService.retrievePassUpdatedAt(anyLong())).thenReturn(
                 LocalDateTime.of(2030, 1, 1, 1, 1, 1));
 
-        mockMvc.perform(post("/shop/v1/members/{memberId}/ggpass/subscribe", 1L))
+        mockMvc.perform(post("/members/{memberId}/ggpass/subscribe", 1L))
                .andExpect(view().name("message"));
 
         verify(memberService, times(0)).subscribePass(anyLong());
@@ -111,7 +111,7 @@ class MemberControllerTest {
     void testWithdrawPass() throws Exception {
         doNothing().when(memberService).withdrawPass(anyLong());
 
-        mockMvc.perform(post("/shop/v1/members/{memberId}/ggpass/withdraw", 1L))
+        mockMvc.perform(post("/members/{memberId}/ggpass/withdraw", 1L))
                .andExpect(status().is3xxRedirection());
 
         verify(memberService, times(1)).withdrawPass(anyLong());
@@ -143,7 +143,7 @@ class MemberControllerTest {
 
         willDoNothing().given(givenCouponService).registerCoupon(anyLong(), any(GivenCouponCreateRequest.class));
 
-        mockMvc.perform(post("/shop/v1/members/{memberId}/coupons", 1L)
+        mockMvc.perform(post("/members/{memberId}/coupons", 1L)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(content))
                .andExpect(status().is3xxRedirection());
@@ -156,7 +156,7 @@ class MemberControllerTest {
     void testRetrieveOwnCoupons() throws Exception {
         given(givenCouponService.retrieveOwnGivenCoupons(anyLong())).willReturn(List.of());
 
-        MvcResult mvcResult = mockMvc.perform(get("/shop/v1/members/{memberId}/coupons", 1L))
+        MvcResult mvcResult = mockMvc.perform(get("/members/{memberId}/coupons", 1L))
                                      .andExpect(status().isOk())
                                      .andExpect(view().name("/mygg/coupons/index"))
                                      .andReturn();

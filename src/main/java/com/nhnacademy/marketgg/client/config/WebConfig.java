@@ -7,7 +7,6 @@ import java.security.KeyStore;
 import java.time.Duration;
 import java.util.Optional;
 import javax.net.ssl.SSLContext;
-import javax.servlet.Filter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -23,7 +22,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.filter.HiddenHttpMethodFilter;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
@@ -46,9 +44,9 @@ public class WebConfig {
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
         return builder
-                .setReadTimeout(Duration.ofSeconds(10L))
-                .setConnectTimeout(Duration.ofSeconds(5L))
-                .build();
+            .setReadTimeout(Duration.ofSeconds(10L))
+            .setConnectTimeout(Duration.ofSeconds(5L))
+            .build();
     }
 
     /**
@@ -63,6 +61,7 @@ public class WebConfig {
     public String gatewayIp(@Value("${gg.gateway-origin}") String ip) {
         return ip;
     }
+
     /**
      * Html 의 Form 태그를 Get, Post 맵핑 이외릐 메소드로 ACTION 할 수 있게 해줍니다.
      *
@@ -134,11 +133,6 @@ public class WebConfig {
     @Bean(name = "clientCertificateAuthenticationRestTemplate")
     public RestTemplate clientCertificationRestTemplate(final HttpComponentsClientHttpRequestFactory requestFactory) {
         return new RestTemplate(requestFactory);
-    }
-
-    @Bean
-    public Filter utfCharacterEncodingFilter() {
-        return new CharacterEncodingFilter("UTF-8", true);
     }
 
 }

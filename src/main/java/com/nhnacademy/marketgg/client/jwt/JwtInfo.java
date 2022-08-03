@@ -15,6 +15,8 @@ public class JwtInfo implements Serializable {
     public static final String JWT_REDIS_KEY = "JWT";
     public static final String JWT_EXPIRE = "JWT-Expire";
     public static final String SESSION_ID = "SESSION-ID";
+    public static final String BEARER = "Bearer ";
+    public static final int BEARER_LENGTH = 7;
 
     private final String jwt;
     private final LocalDateTime jwtExpireDate;

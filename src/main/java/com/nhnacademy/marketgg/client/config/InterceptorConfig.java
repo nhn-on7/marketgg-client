@@ -9,6 +9,8 @@ import org.springframework.web.client.RestTemplate;
 
 /**
  * RestTemplate Interceptor 를 RestTemplate 에 추가 설정하는 클래스입니다.
+ *
+ * @author 윤동열
  */
 @Configuration
 public class InterceptorConfig {
